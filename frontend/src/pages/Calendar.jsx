@@ -1,19 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Check, Edit3, X } from 'lucide-react';
+import { Plus, Trash2, Check, X } from 'lucide-react';
 import { getCalendar, createEvent, updateEvent, deleteEvent } from '../api';
 
 const PILLARS = [
-  { value: 'educativo', label: 'Educativo', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
-  { value: 'autoridade', label: 'Autoridade', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
-  { value: 'bastidores', label: 'Bastidores', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-  { value: 'opiniao', label: 'Opinião', color: 'bg-rose-500/20 text-rose-400 border-rose-500/30' }
+  { value: 'educativo', label: 'Educativo', color: '#0A84FF' },
+  { value: 'autoridade', label: 'Autoridade', color: '#BF5AF2' },
+  { value: 'bastidores', label: 'Bastidores', color: '#FF9F0A' },
+  { value: 'opiniao', label: 'Opinião', color: '#FF453A' }
 ];
 
-const STATUS_COLORS = {
-  pendente: 'text-stone-400',
-  rascunho: 'text-yellow-400',
-  publicado: 'text-emerald-400'
-};
+const STATUS_NEXT = { pendente: 'rascunho', rascunho: 'publicado', publicado: 'pendente' };
+const STATUS_COLOR = { pendente: 'var(--label3)', rascunho: '#FF9F0A', publicado: '#30D158' };
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -36,7 +33,6 @@ export default function Calendar() {
   const weekDates = getWeekDates();
 
   const load = () => getCalendar().then(r => setEvents(r.data)).catch(() => {});
-
   useEffect(() => { load(); }, []);
 
   const submit = async () => {
@@ -50,8 +46,7 @@ export default function Calendar() {
   };
 
   const toggleStatus = async (ev) => {
-    const next = { pendente: 'rascunho', rascunho: 'publicado', publicado: 'pendente' };
-    await updateEvent(ev.id, { status: next[ev.status] });
+    await updateEvent(ev.id, { status: STATUS_NEXT[ev.status] });
     load();
   };
 
@@ -66,30 +61,37 @@ export default function Calendar() {
   };
 
   return (
-    <div className="p-4 space-y-5">
+    <div className="p-4 space-y-5 fade-up">
       <div className="pt-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Calendário</h1>
-          <p className="text-stone-400 text-sm mt-0.5">{new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</p>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--label)', letterSpacing: '-0.5px' }}>Calendário</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--label2)' }}>
+            {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+          </p>
         </div>
         <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-1.5 px-4 py-2 text-sm">
           <Plus size={16} /> Agendar
         </button>
       </div>
 
-      {/* Semana atual */}
+      {/* Mini calendário semanal */}
       <div className="grid grid-cols-7 gap-1">
         {weekDates.map(date => {
           const isToday = date.toDateString() === new Date().toDateString();
           const dayEvents = eventsForDate(date);
           return (
             <div key={date.toISOString()} className="text-center">
-              <p className="text-xs text-stone-500 mb-1">{WEEKDAYS[date.getDay()]}</p>
-              <div className={`rounded-lg p-1.5 min-h-[36px] ${isToday ? 'bg-brand-500/20 border border-brand-500/40' : 'bg-stone-800/40'}`}>
-                <p className={`text-sm font-semibold ${isToday ? 'text-brand-400' : 'text-white'}`}>{date.getDate()}</p>
+              <p className="text-[10px] uppercase mb-1" style={{ color: 'var(--label3)' }}>{WEEKDAYS[date.getDay()]}</p>
+              <div className="rounded-xl p-1.5 min-h-[38px]" style={{
+                background: isToday ? 'rgba(255,159,10,0.15)' : 'var(--bg3)',
+                border: isToday ? '1.5px solid var(--orange)' : '1.5px solid transparent'
+              }}>
+                <p className="text-sm font-bold" style={{ color: isToday ? 'var(--orange)' : 'var(--label)' }}>
+                  {date.getDate()}
+                </p>
                 {dayEvents.length > 0 && (
                   <div className="flex justify-center mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--orange)' }} />
                   </div>
                 )}
               </div>
@@ -98,12 +100,13 @@ export default function Calendar() {
         })}
       </div>
 
-      {/* Pilares de conteúdo */}
+      {/* Pilares */}
       <div>
-        <p className="text-xs text-stone-500 font-medium mb-2 uppercase tracking-wide">Pilares</p>
+        <p className="text-xs font-semibold uppercase tracking-wider px-1 mb-2" style={{ color: 'var(--label3)' }}>Pilares de conteúdo</p>
         <div className="grid grid-cols-2 gap-2">
           {PILLARS.map(p => (
-            <div key={p.value} className={`border rounded-xl px-3 py-2 text-xs font-medium ${p.color}`}>
+            <div key={p.value} className="rounded-xl px-3 py-2 text-xs font-medium"
+              style={{ background: `${p.color}18`, color: p.color, border: `1px solid ${p.color}30` }}>
               {p.label}
             </div>
           ))}
@@ -112,37 +115,43 @@ export default function Calendar() {
 
       {/* Lista de eventos */}
       <div>
-        <p className="text-sm font-semibold text-white mb-3">Todos os posts agendados</p>
+        <p className="text-sm font-semibold px-1 mb-2" style={{ color: 'var(--label)' }}>
+          Todos os posts agendados
+        </p>
         {events.length === 0 ? (
-          <div className="card text-center py-8">
-            <p className="text-stone-500">Nenhum post agendado ainda.</p>
-            <button onClick={() => setShowForm(true)} className="text-brand-500 text-sm mt-2">Agendar primeiro post</button>
+          <div className="card text-center py-10">
+            <p className="text-4xl mb-3">📅</p>
+            <p className="font-semibold" style={{ color: 'var(--label)' }}>Nenhum post agendado</p>
+            <button onClick={() => setShowForm(true)} className="text-sm font-medium mt-2" style={{ color: 'var(--orange)' }}>
+              Agendar primeiro post
+            </button>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="list-group">
             {events.map(ev => {
               const pillar = PILLARS.find(p => p.value === ev.pillar) || PILLARS[0];
               return (
-                <div key={ev.id} className="card flex items-center gap-3">
+                <div key={ev.id} className="flex items-center gap-3 px-4 py-3">
                   <button onClick={() => toggleStatus(ev)} className="shrink-0">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                      ev.status === 'publicado' ? 'bg-emerald-500 border-emerald-500' :
-                      ev.status === 'rascunho' ? 'border-yellow-400' : 'border-stone-600'
-                    }`}>
-                      {ev.status === 'publicado' && <Check size={12} className="text-white" />}
+                    <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
+                      style={{
+                        background: ev.status === 'publicado' ? '#30D158' : 'transparent',
+                        borderColor: STATUS_COLOR[ev.status]
+                      }}>
+                      {ev.status === 'publicado' && <Check size={11} color="white" />}
                     </div>
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">{ev.title}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-stone-500">
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--label)' }}>{ev.title}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs" style={{ color: 'var(--label3)' }}>
                         {new Date(ev.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                       </span>
-                      <span className={`text-xs border rounded-full px-2 py-0.5 ${pillar.color}`}>{pillar.label}</span>
-                      <span className={`text-xs capitalize ${STATUS_COLORS[ev.status]}`}>● {ev.status}</span>
+                      <span className="text-xs font-medium" style={{ color: pillar.color }}>{pillar.label}</span>
+                      <span className="text-xs" style={{ color: STATUS_COLOR[ev.status] }}>● {ev.status}</span>
                     </div>
                   </div>
-                  <button onClick={() => remove(ev.id)} className="text-stone-600 hover:text-red-400 transition-colors p-1">
+                  <button onClick={() => remove(ev.id)} className="p-1 transition-all active:scale-90" style={{ color: 'var(--label3)' }}>
                     <Trash2 size={15} />
                   </button>
                 </div>
@@ -152,16 +161,23 @@ export default function Calendar() {
         )}
       </div>
 
-      {/* Modal formulário */}
+      {/* Bottom sheet formulário */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-end" onClick={() => setShowForm(false)}>
-          <div className="bg-stone-900 border border-stone-700 rounded-t-3xl p-6 w-full max-w-lg mx-auto space-y-4" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white">Novo post</h2>
-              <button onClick={() => setShowForm(false)}><X size={20} className="text-stone-400" /></button>
+        <div className="fixed inset-0 z-50 flex items-end" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setShowForm(false)}>
+          <div
+            className="w-full max-w-lg mx-auto rounded-t-3xl p-6 space-y-4"
+            style={{ background: 'var(--bg2)', borderTop: '1px solid var(--bg4)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-bold" style={{ color: 'var(--label)' }}>Novo post</h2>
+              <button onClick={() => setShowForm(false)} className="p-2 rounded-xl" style={{ background: 'var(--bg3)' }}>
+                <X size={16} style={{ color: 'var(--label2)' }} />
+              </button>
             </div>
+
             <div>
-              <label className="text-xs text-stone-400 mb-1 block">Título do post</label>
+              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--label2)' }}>Título do post</label>
               <input
                 className="input"
                 placeholder="Ex: O erro no contrapiso que custa R$3k"
@@ -169,43 +185,56 @@ export default function Calendar() {
                 onChange={e => setForm({ ...form, title: e.target.value })}
               />
             </div>
+
             <div>
-              <label className="text-xs text-stone-400 mb-1 block">Data</label>
+              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--label2)' }}>Data</label>
               <input type="date" className="input" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
             </div>
+
             <div>
-              <label className="text-xs text-stone-400 mb-1 block">Pilar</label>
+              <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--label2)' }}>Pilar</label>
               <div className="grid grid-cols-2 gap-2">
                 {PILLARS.map(p => (
                   <button
                     key={p.value}
                     onClick={() => setForm({ ...form, pillar: p.value })}
-                    className={`border rounded-xl py-2 text-sm font-medium transition-colors ${
-                      form.pillar === p.value ? p.color : 'border-stone-700 text-stone-400'
-                    }`}
+                    className="rounded-xl py-2 text-sm font-medium transition-all"
+                    style={{
+                      background: form.pillar === p.value ? `${p.color}20` : 'var(--bg3)',
+                      border: `1.5px solid ${form.pillar === p.value ? p.color : 'transparent'}`,
+                      color: form.pillar === p.value ? p.color : 'var(--label2)'
+                    }}
                   >
                     {p.label}
                   </button>
                 ))}
               </div>
             </div>
+
             <div>
-              <label className="text-xs text-stone-400 mb-1 block">Plataforma</label>
-              <div className="flex gap-2">
+              <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--label2)' }}>Plataforma</label>
+              <div className="flex p-1 rounded-xl" style={{ background: 'var(--bg3)' }}>
                 {['instagram', 'tiktok'].map(p => (
                   <button
                     key={p}
                     onClick={() => setForm({ ...form, platform: p })}
-                    className={`flex-1 py-2 text-sm rounded-xl font-medium border transition-colors capitalize ${
-                      form.platform === p ? 'border-brand-500 bg-brand-500/10 text-brand-400' : 'border-stone-700 text-stone-400'
-                    }`}
+                    className="flex-1 py-1.5 text-sm rounded-lg font-medium transition-all"
+                    style={{
+                      background: form.platform === p ? 'var(--bg4)' : 'transparent',
+                      color: form.platform === p ? 'var(--label)' : 'var(--label3)'
+                    }}
                   >
                     {p === 'instagram' ? '📸 Instagram' : '🎵 TikTok'}
                   </button>
                 ))}
               </div>
             </div>
-            <button onClick={submit} disabled={loading || !form.title || !form.date} className="btn-primary w-full">
+
+            <button
+              onClick={submit}
+              disabled={loading || !form.title || !form.date}
+              className="btn-primary w-full"
+            >
               {loading ? 'Salvando...' : 'Agendar post'}
             </button>
           </div>

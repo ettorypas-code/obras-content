@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookmarkCheck, Trash2, Search, Filter } from 'lucide-react';
+import { Trash2, Search } from 'lucide-react';
 import { getLibrary, deleteContent } from '../api';
 import PotentialBadge from '../components/PotentialBadge';
+
+const FILTERS = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'alto', label: '🔥 Alto' },
+  { value: 'medio', label: '🟡 Médio' },
+  { value: 'baixo', label: '⚪ Baixo' }
+];
 
 export default function Library() {
   const navigate = useNavigate();
@@ -27,15 +34,17 @@ export default function Library() {
   });
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 space-y-4 fade-up">
       <div className="pt-4">
-        <h1 className="text-2xl font-bold text-white">Biblioteca</h1>
-        <p className="text-stone-400 text-sm mt-0.5">{items.length} conteúdo{items.length !== 1 ? 's' : ''} gerado{items.length !== 1 ? 's' : ''}</p>
+        <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--label)', letterSpacing: '-0.5px' }}>Biblioteca</h1>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--label2)' }}>
+          {items.length} conteúdo{items.length !== 1 ? 's' : ''} gerado{items.length !== 1 ? 's' : ''}
+        </p>
       </div>
 
       {/* Busca */}
       <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500" />
+        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--label3)' }} />
         <input
           className="input pl-9"
           placeholder="Buscar conteúdo..."
@@ -46,18 +55,15 @@ export default function Library() {
 
       {/* Filtros */}
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {[
-          { value: 'todos', label: 'Todos' },
-          { value: 'alto', label: '🔥 Alto' },
-          { value: 'medio', label: '🟡 Médio' },
-          { value: 'baixo', label: '⚪ Baixo' }
-        ].map(f => (
+        {FILTERS.map(f => (
           <button
             key={f.value}
             onClick={() => setFilter(f.value)}
-            className={`whitespace-nowrap text-sm px-4 py-1.5 rounded-full font-medium transition-colors ${
-              filter === f.value ? 'bg-brand-500 text-white' : 'bg-stone-800 text-stone-400'
-            }`}
+            className="whitespace-nowrap text-sm px-4 py-1.5 rounded-full font-medium transition-all"
+            style={{
+              background: filter === f.value ? 'var(--orange)' : 'var(--bg3)',
+              color: filter === f.value ? 'black' : 'var(--label2)'
+            }}
           >
             {f.label}
           </button>
@@ -66,9 +72,12 @@ export default function Library() {
 
       {filtered.length === 0 ? (
         <div className="card text-center py-12">
-          <BookmarkCheck size={36} className="text-stone-600 mx-auto mb-3" />
-          <p className="text-stone-400 font-medium">
+          <p className="text-4xl mb-3">📚</p>
+          <p className="font-semibold" style={{ color: 'var(--label)' }}>
             {items.length === 0 ? 'Nenhum conteúdo ainda' : 'Nenhum resultado'}
+          </p>
+          <p className="text-sm mt-1" style={{ color: 'var(--label2)' }}>
+            {items.length === 0 ? 'Envie sua primeira foto de obra' : 'Tente outro filtro'}
           </p>
           {items.length === 0 && (
             <button onClick={() => navigate('/upload')} className="btn-primary mt-4">
@@ -77,36 +86,33 @@ export default function Library() {
           )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="list-group">
           {filtered.map(item => {
             const ideas = Array.isArray(item.ideas) ? item.ideas : JSON.parse(item.ideas || '[]');
             return (
               <div
                 key={item.id}
                 onClick={() => navigate('/result', { state: { result: item, fromLibrary: true } })}
-                className="card flex gap-3 cursor-pointer hover:border-stone-700 transition-colors active:scale-[0.99]"
+                className="flex gap-3 px-4 py-3 cursor-pointer transition-all active:scale-[0.99]"
               >
-                <img
-                  src={item.image_url}
-                  alt=""
-                  className="w-20 h-20 rounded-xl object-cover shrink-0"
-                />
+                <img src={item.image_url} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-white text-sm font-medium leading-snug line-clamp-2">
+                    <p className="text-sm font-medium leading-snug line-clamp-2" style={{ color: 'var(--label)' }}>
                       {ideas[0]?.title || item.context}
                     </p>
                     <button
                       onClick={(e) => remove(item.id, e)}
-                      className="text-stone-600 hover:text-red-400 transition-colors shrink-0 p-0.5"
+                      className="shrink-0 p-0.5 transition-all active:scale-90"
+                      style={{ color: 'var(--label3)' }}
                     >
                       <Trash2 size={14} />
                     </button>
                   </div>
-                  <p className="text-stone-500 text-xs mt-1 line-clamp-1">{item.context}</p>
-                  <div className="flex items-center gap-2 mt-2">
+                  <p className="text-xs mt-0.5 line-clamp-1" style={{ color: 'var(--label3)' }}>{item.context}</p>
+                  <div className="flex items-center gap-2 mt-1.5">
                     <PotentialBadge value={item.potential} />
-                    <span className="text-stone-600 text-xs">
+                    <span className="text-xs" style={{ color: 'var(--label3)' }}>
                       {new Date(item.created_at).toLocaleDateString('pt-BR')}
                     </span>
                   </div>

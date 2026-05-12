@@ -3,29 +3,120 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg: #000000;
+    --bg2: #1C1C1E;
+    --bg3: #2C2C2E;
+    --bg4: #3A3A3C;
+    --sep: rgba(84,84,88,0.65);
+    --sep-light: rgba(255,255,255,0.08);
+    --label: #FFFFFF;
+    --label2: rgba(235,235,245,0.6);
+    --label3: rgba(235,235,245,0.3);
+    --fill: rgba(120,120,128,0.36);
+    --orange: #FF9F0A;
+    --radius: 13px;
+    --radius-lg: 20px;
+  }
   body {
-    @apply bg-stone-950 text-stone-50 font-sans antialiased;
+    background: var(--bg);
+    color: var(--label);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  * {
-    @apply box-border;
-  }
+  * { box-sizing: border-box; }
 }
 
 @layer components {
+  .surface { background: var(--bg2); border-radius: var(--radius-lg); }
+  .surface2 { background: var(--bg3); border-radius: var(--radius); }
+  .surface3 { background: var(--bg4); border-radius: var(--radius); }
+
+  .label { color: var(--label); }
+  .label2 { color: var(--label2); }
+  .label3 { color: var(--label3); }
+
+  .sep { border-color: var(--sep-light); }
+
   .btn-primary {
-    @apply bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white font-semibold px-5 py-3 rounded-xl transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+    background: var(--orange);
+    color: #000;
+    font-weight: 600;
+    padding: 14px 20px;
+    border-radius: var(--radius);
+    font-size: 17px;
+    letter-spacing: -0.3px;
+    transition: opacity 0.15s, transform 0.1s;
+    box-shadow: 0 2px 12px rgba(255,159,10,0.3);
   }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.4; }
+
   .btn-ghost {
-    @apply bg-stone-800 hover:bg-stone-700 text-stone-200 font-medium px-5 py-3 rounded-xl transition-colors duration-150;
+    background: var(--bg3);
+    color: var(--label);
+    font-weight: 500;
+    padding: 14px 20px;
+    border-radius: var(--radius);
+    font-size: 15px;
+    transition: opacity 0.15s;
   }
-  .card {
-    @apply bg-stone-900 border border-stone-800 rounded-2xl p-4;
-  }
+  .btn-ghost:hover { opacity: 0.8; }
+
   .input {
-    @apply bg-stone-800 border border-stone-700 text-stone-50 placeholder-stone-500 rounded-xl px-4 py-3 w-full focus:outline-none focus:border-brand-500 transition-colors;
+    background: var(--bg3);
+    color: var(--label);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-size: 17px;
+    width: 100%;
+    outline: none;
+    transition: box-shadow 0.2s;
+    border: 1.5px solid transparent;
+  }
+  .input::placeholder { color: var(--label3); }
+  .input:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,159,10,0.15); }
+
+  .card {
+    background: var(--bg2);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.3);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
   }
 }
 
-::-webkit-scrollbar { width: 6px; }
+/* iOS-style list group */
+.list-group {
+  background: var(--bg2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.list-group > * + * {
+  border-top: 1px solid var(--sep-light);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { @apply bg-stone-700 rounded-full; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 99px; }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.3s ease; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
