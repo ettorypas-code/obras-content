@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Camera, ArrowRight, Flame, CalendarDays } from 'lucide-react';
 import { getLibrary, getCalendar } from '../api';
 import PotentialBadge from '../components/PotentialBadge';
+import { usePostNotifications } from '../hooks/usePostNotifications';
 
 const PILLARS = {
   educativo: { label: 'Educativo', color: '#0A84FF' },
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const [library, setLibrary] = useState([]);
   const [events, setEvents] = useState([]);
   const profile = JSON.parse(localStorage.getItem('obras_profile') || '{}');
+  usePostNotifications();
 
   useEffect(() => {
     getLibrary().then(r => setLibrary(r.data.slice(0, 4))).catch(() => {});

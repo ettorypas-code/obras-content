@@ -6,6 +6,8 @@ const path = require('path');
 const analyzeRouter = require('./routes/analyze');
 const libraryRouter = require('./routes/library');
 const calendarRouter = require('./routes/calendar');
+const bioRouter = require('./routes/bio');
+const metricsRouter = require('./routes/metrics');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,6 +18,8 @@ app.use(express.json());
 app.use('/api/analyze', analyzeRouter);
 app.use('/api/library', libraryRouter);
 app.use('/api/calendar', calendarRouter);
+app.use('/api/bio', bioRouter);
+app.use('/api/metrics', metricsRouter);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

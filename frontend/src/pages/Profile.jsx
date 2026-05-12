@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ChevronLeft, LogOut, ChevronRight, User } from 'lucide-react';
+import { ChevronLeft, LogOut, ChevronRight, User, Sparkles } from 'lucide-react';
 
 const ROLES = { engenheiro: 'Engenheiro Civil', consultor: 'Consultor de Obras', incorporador: 'Incorporador', mestre: 'Mestre de Obras', arquiteto: 'Arquiteto', outro: 'Outro' };
 const GOALS = { clientes: 'Atrair clientes', autoridade: 'Ganhar autoridade', seguidores: 'Crescer seguidores', marca: 'Construir minha marca' };
@@ -66,6 +66,20 @@ export default function Profile() {
           </div>
         </div>
       )}
+
+      {/* Ferramentas IA */}
+      <div className="mb-4">
+        <p className="text-xs font-semibold uppercase tracking-wider px-1 mb-2" style={{ color: 'var(--label3)' }}>Ferramentas IA</p>
+        <div className="list-group">
+          <button onClick={() => navigate('/bio')} className="w-full flex items-center justify-between px-4 py-3.5">
+            <div className="flex items-center gap-3">
+              <Sparkles size={16} style={{ color: 'var(--orange)' }} />
+              <span className="text-sm" style={{ color: 'var(--label)' }}>Gerar bio para Instagram/TikTok</span>
+            </div>
+            <ChevronRight size={16} style={{ color: 'var(--label3)' }} />
+          </button>
+        </div>
+      </div>
 
       {/* Actions */}
       <div className="mb-4">

@@ -9,6 +9,7 @@ import Library from './pages/Library';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
+import BioGenerator from './pages/BioGenerator';
 import { Loader2 } from 'lucide-react';
 
 function ProtectedRoute({ children }) {
@@ -41,6 +42,7 @@ function AppRoutes() {
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/library" element={<Library />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/bio" element={<BioGenerator />} />
               </Routes>
             </div>
             <Navbar />

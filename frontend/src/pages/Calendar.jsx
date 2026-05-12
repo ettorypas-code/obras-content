@@ -28,7 +28,7 @@ function getWeekDates() {
 export default function Calendar() {
   const [events, setEvents] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ date: '', pillar: 'educativo', platform: 'instagram', title: '' });
+  const [form, setForm] = useState({ date: '', pillar: 'educativo', platform: 'instagram', title: '', series: '', episode: '' });
   const [loading, setLoading] = useState(false);
   const weekDates = getWeekDates();
 
@@ -40,7 +40,7 @@ export default function Calendar() {
     setLoading(true);
     await createEvent(form);
     setShowForm(false);
-    setForm({ date: '', pillar: 'educativo', platform: 'instagram', title: '' });
+    setForm({ date: '', pillar: 'educativo', platform: 'instagram', title: '', series: '', episode: '' });
     await load();
     setLoading(false);
   };
@@ -143,12 +143,17 @@ export default function Calendar() {
                   </button>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate" style={{ color: 'var(--label)' }}>{ev.title}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       <span className="text-xs" style={{ color: 'var(--label3)' }}>
                         {new Date(ev.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                       </span>
                       <span className="text-xs font-medium" style={{ color: pillar.color }}>{pillar.label}</span>
                       <span className="text-xs" style={{ color: STATUS_COLOR[ev.status] }}>● {ev.status}</span>
+                      {ev.series && (
+                        <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{ background: 'rgba(191,90,242,0.15)', color: '#BF5AF2' }}>
+                          {ev.series}{ev.episode ? ` Ep.${ev.episode}` : ''}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <button onClick={() => remove(ev.id)} className="p-1 transition-all active:scale-90" style={{ color: 'var(--label3)' }}>
@@ -227,6 +232,16 @@ export default function Calendar() {
                     {p === 'instagram' ? '📸 Instagram' : '🎵 TikTok'}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--label2)' }}>
+                Série (opcional) — ex: "Obra do Zero"
+              </label>
+              <div className="flex gap-2">
+                <input className="input flex-1" placeholder="Nome da série" value={form.series} onChange={e => setForm({ ...form, series: e.target.value })} />
+                <input className="input w-20 text-center" placeholder="Ep." type="number" min="1" value={form.episode} onChange={e => setForm({ ...form, episode: e.target.value })} />
               </div>
             </div>
 

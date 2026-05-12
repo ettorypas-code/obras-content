@@ -21,4 +21,9 @@ export const createEvent = (data) => api.post('/calendar', data);
 export const updateEvent = (id, data) => api.patch(`/calendar/${id}`, data);
 export const deleteEvent = (id) => api.delete(`/calendar/${id}`);
 
+export const generateBio = (profile) => api.post('/bio', profile);
+
+export const saveMetrics = (id, data) => api.post(`/metrics/${id}`, data);
+export const getMetrics = (id) => api.get(`/metrics/${id}`);
+
 export default api;
