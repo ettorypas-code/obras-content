@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Image, Sparkles, Loader2, X, AlertCircle, ChevronLeft } from 'lucide-react';
+import { Camera, Image, Sparkles, Loader2, X, AlertCircle, ChevronLeft, ImagePlus } from 'lucide-react';
 import { analyzeImage } from '../api';
 
 const TIPS = [
@@ -17,6 +17,7 @@ export default function Upload() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const fileRef = useRef();
+  const cameraRef = useRef();
 
   const handleFile = (f) => {
     if (!f) return;
@@ -60,27 +61,52 @@ export default function Upload() {
       </div>
 
       {!preview ? (
-        <div
-          onDrop={handleDrop}
-          onDragOver={e => e.preventDefault()}
-          onClick={() => fileRef.current.click()}
-          className="rounded-3xl p-8 text-center cursor-pointer transition-all active:scale-[0.98]"
-          style={{ background: 'var(--bg2)', border: '1.5px dashed var(--bg4)' }}
-        >
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--bg3)' }}>
-            <Camera size={28} style={{ color: 'var(--orange)' }} />
+        <div className="space-y-3">
+          {/* Botões de ação */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Galeria */}
+            <button
+              onClick={() => fileRef.current.click()}
+              className="flex flex-col items-center gap-3 p-5 rounded-3xl transition-all active:scale-[0.97]"
+              style={{ background: 'var(--bg2)', border: '1.5px solid var(--bg4)' }}
+            >
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(10,132,255,0.15)' }}>
+                <ImagePlus size={24} color="#0A84FF" />
+              </div>
+              <div className="text-center">
+                <p className="font-semibold text-sm" style={{ color: 'var(--label)' }}>Galeria</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--label3)' }}>Escolher foto</p>
+              </div>
+            </button>
+
+            {/* Câmera */}
+            <button
+              onClick={() => cameraRef.current.click()}
+              className="flex flex-col items-center gap-3 p-5 rounded-3xl transition-all active:scale-[0.97]"
+              style={{ background: 'var(--bg2)', border: '1.5px solid var(--bg4)' }}
+            >
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,159,10,0.15)' }}>
+                <Camera size={24} color="var(--orange)" />
+              </div>
+              <div className="text-center">
+                <p className="font-semibold text-sm" style={{ color: 'var(--label)' }}>Câmera</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--label3)' }}>Tirar foto</p>
+              </div>
+            </button>
           </div>
-          <p className="font-semibold text-base" style={{ color: 'var(--label)' }}>Toque para escolher uma foto</p>
-          <p className="text-sm mt-1" style={{ color: 'var(--label2)' }}>ou arraste uma imagem aqui</p>
-          <p className="text-xs mt-3" style={{ color: 'var(--label3)' }}>JPG, PNG, WEBP até 10MB</p>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={e => handleFile(e.target.files[0])}
-          />
+
+          {/* Drop zone */}
+          <div
+            onDrop={handleDrop}
+            onDragOver={e => e.preventDefault()}
+            className="rounded-2xl p-4 text-center"
+            style={{ border: '1.5px dashed var(--bg4)' }}
+          >
+            <p className="text-xs" style={{ color: 'var(--label3)' }}>ou arraste uma imagem aqui · JPG, PNG, WEBP até 10MB</p>
+          </div>
+
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => handleFile(e.target.files[0])} />
+          <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleFile(e.target.files[0])} />
         </div>
       ) : (
         <div className="relative">
