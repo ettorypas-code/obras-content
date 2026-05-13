@@ -21,9 +21,8 @@ export const analyzeImage = (files, theme = 'dicas') => {
   fileArray.forEach(f => form.append('images', f));
   form.append('image', fileArray[0]); // backward compat
   form.append('theme', theme);
-  return api.post('/analyze', form, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
+  // NÃO definir Content-Type manualmente — o browser adiciona o boundary automaticamente
+  return api.post('/analyze', form);
 };
 
 export const getLibrary = () => api.get('/library');
