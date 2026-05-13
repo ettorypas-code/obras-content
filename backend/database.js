@@ -103,10 +103,10 @@ const db = {
   async uploadImage(buffer, filename, mimetype) {
     const supabase = getSupabase();
     const { error } = await supabase.storage
-      .from('obra-images')
+      .from('obras-images')
       .upload(filename, buffer, { contentType: mimetype, upsert: true });
     if (error) throw error;
-    const { data } = supabase.storage.from('obra-images').getPublicUrl(filename);
+    const { data } = supabase.storage.from('obras-images').getPublicUrl(filename);
     return data.publicUrl;
   }
 };
