@@ -4,9 +4,10 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api'
 });
 
-export const analyzeImage = (file, theme = 'dicas') => {
+export const analyzeImage = (files, theme = 'dicas') => {
   const form = new FormData();
-  form.append('image', file);
+  const fileArray = Array.isArray(files) ? files : [files];
+  fileArray.forEach(f => form.append('images', f));
   form.append('theme', theme);
   return api.post('/analyze', form, {
     headers: { 'Content-Type': 'multipart/form-data' }

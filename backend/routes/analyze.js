@@ -1,7 +1,6 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 const db = require('../database');
 const { analyzeAndGenerate } = require('../services/openai');
 
@@ -16,15 +15,21 @@ const upload = multer({
   }
 });
 
-router.post('/', upload.single('image'), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada.' });
+router.post('/', upload.array('images', 5), async (req, res) => {
+  const files = req.files;
+  if (!files || files.length === 0) return res.status(400).json({ error: 'Nenhuma imagem enviada.' });
 
   try {
-    const filename = `${Date.now()}${path.extname(req.file.originalname)}`;
-    const imageUrl = await db.uploadImage(req.file.buffer, filename, req.file.mimetype);
-
     const theme = req.body.theme || 'dicas';
-    const result = await analyzeAndGenerate(req.file.buffer, req.file.mimetype, theme);
+
+    // Upload da primeira imagem como capa; demais são contexto adicional
+    const mainFile = files[0];
+    const filename = `${Date.now()}${path.extname(mainFile.originalname)}`;
+    const imageUrl = await db.uploadImage(mainFile.buffer, filename, mainFile.mimetype);
+
+    // Monta array de imagens para o Gemini
+    const images = files.map(f => ({ buffer: f.buffer, mimeType: f.mimetype }));
+    const result = await analyzeAndGenerate(images, theme);
 
     const analysisId = await db.insertAnalysis({
       image_path: filename,
@@ -48,7 +53,6 @@ router.post('/', upload.single('image'), async (req, res) => {
     res.json({
       id: contentId,
       analysisId,
-      contentId,
       imageUrl,
       context: result.context,
       opportunity: result.opportunity,
