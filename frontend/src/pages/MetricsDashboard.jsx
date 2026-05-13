@@ -33,11 +33,12 @@ export default function MetricsDashboard() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState(null);
 
   useEffect(() => {
     getAllMetrics()
       .then(r => setData(r.data || []))
-      .catch(() => {})
+      .catch(e => setErro(e.response?.data?.error || 'Erro ao carregar métricas.'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -92,6 +93,12 @@ export default function MetricsDashboard() {
       {loading ? (
         <div className="card text-center py-12">
           <p style={{ color: 'var(--label3)' }}>Carregando...</p>
+        </div>
+      ) : erro ? (
+        <div className="card text-center py-12">
+          <p className="text-3xl mb-3">⚠️</p>
+          <p className="font-semibold" style={{ color: 'var(--label)' }}>Erro ao carregar</p>
+          <p className="text-sm mt-1" style={{ color: '#FF453A' }}>{erro}</p>
         </div>
       ) : data.length === 0 ? (
         <div className="card text-center py-12">

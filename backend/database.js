@@ -52,7 +52,7 @@ const db = {
     const supabase = getSupabase();
     let query = supabase
       .from('content_items')
-      .select('id, theme, created_at, analyses(context, potential), content_metrics(views, likes, comments, saves, platform)')
+      .select('*, analyses(context, potential), content_metrics(views, likes, comments, saves, platform)')
       .order('created_at', { ascending: false });
     if (userId) query = query.eq('user_id', userId);
     const { data, error } = await query;

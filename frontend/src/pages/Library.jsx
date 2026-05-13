@@ -34,8 +34,8 @@ function MetricsModal({ item, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end" style={{ background: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
-      <div className="w-full max-w-lg mx-auto rounded-t-3xl p-6 space-y-4"
-        style={{ background: 'var(--bg2)', borderTop: '1px solid var(--bg4)' }}
+      <div className="w-full max-w-lg mx-auto rounded-t-3xl p-6 space-y-4 overflow-y-auto"
+        style={{ background: 'var(--bg2)', borderTop: '1px solid var(--bg4)', maxHeight: '85vh', paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
         onClick={e => e.stopPropagation()}>
 
         <div className="flex items-center justify-between">
@@ -140,7 +140,11 @@ export default function Library() {
             return (
               <div key={item.id} onClick={() => navigate('/result', { state: { result: item, fromLibrary: true } })}
                 className="flex gap-3 px-4 py-3 cursor-pointer transition-all active:scale-[0.99]">
-                <img src={item.image_url} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                {item.image_url
+                  ? <img src={item.image_url} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                  : <div className="w-16 h-16 rounded-xl shrink-0 flex items-center justify-center text-2xl"
+                      style={{ background: 'var(--bg3)' }}>📝</div>
+                }
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm font-medium leading-snug line-clamp-2" style={{ color: 'var(--label)' }}>
