@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Copy, Check, Bookmark, BookmarkCheck, CalendarPlus, ChevronDown, ChevronUp, Scissors, Lightbulb, ChevronLeft, Share2, Zap, Play, Pause, X, Gauge } from 'lucide-react';
+import { Copy, Check, Bookmark, BookmarkCheck, CalendarPlus, ChevronDown, ChevronUp, Scissors, Lightbulb, ChevronLeft, Share2, Zap, Play, Pause, X, Gauge, Layers, ListOrdered, Loader2 } from 'lucide-react';
 import PotentialBadge from '../components/PotentialBadge';
-import { saveContent, createEvent } from '../api';
+import { saveContent, createEvent, generateSequence } from '../api';
 
 function Teleprompter({ script, onClose }) {
   const scrollRef = useRef(null);
@@ -142,6 +142,8 @@ export default function Result() {
   const [activePlatform, setActivePlatform] = useState('instagram');
   const [addedToCalendar, setAddedToCalendar] = useState(false);
   const [teleprompter, setTeleprompter] = useState(false);
+  const [sequence, setSequence] = useState(null);
+  const [loadingSequence, setLoadingSequence] = useState(false);
 
   if (!result) {
     return (
@@ -179,6 +181,23 @@ export default function Result() {
       title: ideas[0]?.title || result.context
     });
     setAddedToCalendar(true);
+  };
+
+  const handleGenerateSequence = async () => {
+    setLoadingSequence(true);
+    try {
+      const topic = ideas[0]?.title || result.context;
+      const res = await generateSequence(topic, 'dicas');
+      setSequence(res.data);
+    } catch {}
+    setLoadingSequence(false);
+  };
+
+  const copyFullScript = () => {
+    const s = scripts[activeScript];
+    if (!s) return;
+    const text = `🎬 HOOK\n${s.hook}\n\n📱 DESENVOLVIMENTO\n${s.development}\n\n⚡ RETENÇÃO\n${s.retention}\n\n📣 CTA\n${s.cta}`;
+    navigator.clipboard.writeText(text);
   };
 
   const handleShare = async () => {
@@ -260,11 +279,18 @@ export default function Result() {
       {scripts.length > 0 && (
         <Accordion title="Roteiros prontos" icon={Zap} defaultOpen={true} accent="#BF5AF2"
           extra={
-            <button onClick={() => setTeleprompter(true)}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all active:scale-95"
-              style={{ background: 'rgba(191,90,242,0.15)', color: '#BF5AF2' }}>
-              <Play size={12} fill="#BF5AF2" /> Teleprompter
-            </button>
+            <div className="flex gap-1.5">
+              <button onClick={copyFullScript}
+                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition-all active:scale-95"
+                style={{ background: 'var(--bg3)', color: 'var(--label2)' }}>
+                <Copy size={11} /> Copiar
+              </button>
+              <button onClick={() => setTeleprompter(true)}
+                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition-all active:scale-95"
+                style={{ background: 'rgba(191,90,242,0.15)', color: '#BF5AF2' }}>
+                <Play size={11} fill="#BF5AF2" /> Teleprompter
+              </button>
+            </div>
           }>
           {scripts.length > 1 && (
             <div className="flex gap-2 mb-3">
@@ -355,17 +381,51 @@ export default function Result() {
         </Accordion>
       )}
 
+      {/* Ações extras */}
+      <div className="grid grid-cols-2 gap-3">
+        <button onClick={() => navigate('/carousel', { state: { result } })}
+          className="flex items-center justify-center gap-2 text-sm font-semibold py-3 rounded-2xl transition-all active:scale-95"
+          style={{ background: 'var(--bg3)', color: 'var(--label)' }}>
+          <Layers size={16} /> Gerar carrossel
+        </button>
+        <button onClick={handleGenerateSequence} disabled={loadingSequence}
+          className="flex items-center justify-center gap-2 text-sm font-semibold py-3 rounded-2xl transition-all active:scale-95"
+          style={{ background: 'rgba(48,209,88,0.1)', color: '#30D158' }}>
+          {loadingSequence
+            ? <><Loader2 size={15} className="animate-spin" /> Gerando...</>
+            : <><ListOrdered size={16} /> Série de 5</>}
+        </button>
+      </div>
+
+      {/* Série de 5 posts */}
+      {sequence && (
+        <div className="card space-y-3">
+          <div className="flex items-center gap-2">
+            <ListOrdered size={16} color="#30D158" />
+            <p className="font-semibold text-sm" style={{ color: 'var(--label)' }}>{sequence.series_name}</p>
+          </div>
+          {(sequence.posts || []).map((post, i) => (
+            <div key={i} className="rounded-2xl p-3 space-y-1" style={{ background: 'var(--bg3)' }}>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                  style={{ background: 'rgba(48,209,88,0.2)', color: '#30D158' }}>
+                  Ep.{post.episode}
+                </span>
+                <span className="text-xs" style={{ color: 'var(--label3)' }}>{post.format}</span>
+              </div>
+              <p className="text-sm font-semibold" style={{ color: 'var(--label)' }}>{post.title}</p>
+              <p className="text-xs" style={{ color: 'var(--label2)' }}>🎣 {post.hook}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Ações */}
       <div className="flex gap-3 pb-4">
-        <button
-          onClick={handleAddToCalendar}
-          disabled={addedToCalendar}
+        <button onClick={handleAddToCalendar} disabled={addedToCalendar}
           className="flex-1 flex items-center justify-center gap-2 text-sm font-semibold py-3 rounded-2xl transition-all"
-          style={{ background: 'var(--bg3)', color: addedToCalendar ? '#30D158' : 'var(--label)' }}
-        >
-          {addedToCalendar
-            ? <><Check size={16} /> Agendado!</>
-            : <><CalendarPlus size={16} /> Agendar</>}
+          style={{ background: 'var(--bg3)', color: addedToCalendar ? '#30D158' : 'var(--label)' }}>
+          {addedToCalendar ? <><Check size={16} /> Agendado!</> : <><CalendarPlus size={16} /> Agendar</>}
         </button>
         <button onClick={() => navigate('/upload')} className="btn-primary flex-1 text-sm">
           Nova análise

@@ -38,6 +38,9 @@ export const deleteEvent = (id) => api.delete(`/calendar/${id}`);
 export const analyzeText = (situation, theme = 'dicas') =>
   api.post('/analyze-text', { situation, theme });
 
+export const generateSequence = (topic, theme = 'dicas') =>
+  api.post('/sequence', { topic, theme });
+
 export const generateBio = (profile) => api.post('/bio', profile);
 
 export const saveMetrics = (id, data) => api.post(`/metrics/${id}`, data);

@@ -160,4 +160,37 @@ Retorne APENAS JSON válido, sem markdown, com esta estrutura exata:
   return JSON.parse(clean);
 }
 
-module.exports = { analyzeAndGenerate, analyzeTextOnly };
+async function generateSequence(topic, theme = 'dicas') {
+  const genAI = getClient();
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const t = THEME_CONTEXT[theme] || THEME_CONTEXT.dicas;
+
+  const prompt = `Você é um estrategista de conteúdo para Instagram e TikTok especialista em construção civil.
+
+TÓPICO CENTRAL: "${topic}"
+TEMA: "${t.label}" — ${t.instruction}
+
+Crie uma SÉRIE de 5 posts sequenciais sobre esse tópico. Cada post deve ser independente mas fazer parte de uma narrativa coesa.
+
+Retorne APENAS JSON válido, sem markdown:
+{
+  "series_name": "nome criativo da série",
+  "posts": [
+    {
+      "episode": 1,
+      "title": "título chamativo do post",
+      "hook": "gancho dos primeiros 3 segundos",
+      "angle": "ângulo/abordagem único deste post",
+      "caption_instagram": "legenda com emojis e 5 hashtags",
+      "format": "Reels/Carrossel/Stories"
+    }
+  ]
+}`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text().trim();
+  const clean = text.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+  return JSON.parse(clean);
+}
+
+module.exports = { analyzeAndGenerate, analyzeTextOnly, generateSequence };

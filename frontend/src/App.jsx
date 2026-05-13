@@ -13,6 +13,8 @@ import Profile from './pages/Profile';
 import BioGenerator from './pages/BioGenerator';
 import TextAnalyze from './pages/TextAnalyze';
 import MetricsDashboard from './pages/MetricsDashboard';
+import Hashtags from './pages/Hashtags';
+import CarouselGenerator from './pages/CarouselGenerator';
 import { Loader2 } from 'lucide-react';
 
 function ProtectedRoute({ children }) {
@@ -49,6 +51,8 @@ function AppRoutes() {
                   <Route path="/bio" element={<BioGenerator />} />
                   <Route path="/text" element={<TextAnalyze />} />
                   <Route path="/metrics" element={<MetricsDashboard />} />
+                  <Route path="/hashtags" element={<Hashtags />} />
+                  <Route path="/carousel" element={<CarouselGenerator />} />
                 </Routes>
               </ErrorBoundary>
             </div>

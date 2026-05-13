@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ChevronLeft, LogOut, ChevronRight, User, Sparkles } from 'lucide-react';
+import { ChevronLeft, LogOut, ChevronRight, User, Sparkles, Hash, Layers } from 'lucide-react';
 
 const ROLES = { engenheiro: 'Engenheiro Civil', consultor: 'Consultor de Obras', incorporador: 'Incorporador', mestre: 'Mestre de Obras', arquiteto: 'Arquiteto', outro: 'Outro' };
 const GOALS = { clientes: 'Atrair clientes', autoridade: 'Ganhar autoridade', seguidores: 'Crescer seguidores', marca: 'Construir minha marca' };
@@ -69,15 +69,21 @@ export default function Profile() {
 
       {/* Ferramentas IA */}
       <div className="mb-4">
-        <p className="text-xs font-semibold uppercase tracking-wider px-1 mb-2" style={{ color: 'var(--label3)' }}>Ferramentas IA</p>
+        <p className="text-xs font-semibold uppercase tracking-wider px-1 mb-2" style={{ color: 'var(--label3)' }}>Ferramentas</p>
         <div className="list-group">
-          <button onClick={() => navigate('/bio')} className="w-full flex items-center justify-between px-4 py-3.5">
-            <div className="flex items-center gap-3">
-              <Sparkles size={16} style={{ color: 'var(--orange)' }} />
-              <span className="text-sm" style={{ color: 'var(--label)' }}>Gerar bio para Instagram/TikTok</span>
-            </div>
-            <ChevronRight size={16} style={{ color: 'var(--label3)' }} />
-          </button>
+          {[
+            { icon: Sparkles, label: 'Gerar bio para Instagram/TikTok', path: '/bio', color: 'var(--orange)' },
+            { icon: Hash,     label: 'Banco de hashtags por tema',       path: '/hashtags', color: '#BF5AF2' },
+            { icon: Layers,   label: 'Gerador de carrossel visual',      path: '/carousel', color: '#0A84FF' },
+          ].map(({ icon: Icon, label, path, color }) => (
+            <button key={path} onClick={() => navigate(path)} className="w-full flex items-center justify-between px-4 py-3.5">
+              <div className="flex items-center gap-3">
+                <Icon size={16} style={{ color }} />
+                <span className="text-sm" style={{ color: 'var(--label)' }}>{label}</span>
+              </div>
+              <ChevronRight size={16} style={{ color: 'var(--label3)' }} />
+            </button>
+          ))}
         </div>
       </div>
 
