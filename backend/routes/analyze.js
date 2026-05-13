@@ -23,7 +23,8 @@ router.post('/', upload.single('image'), async (req, res) => {
     const filename = `${Date.now()}${path.extname(req.file.originalname)}`;
     const imageUrl = await db.uploadImage(req.file.buffer, filename, req.file.mimetype);
 
-    const result = await analyzeAndGenerate(req.file.buffer, req.file.mimetype);
+    const theme = req.body.theme || 'dicas';
+    const result = await analyzeAndGenerate(req.file.buffer, req.file.mimetype, theme);
 
     const analysisId = await db.insertAnalysis({
       image_path: filename,
