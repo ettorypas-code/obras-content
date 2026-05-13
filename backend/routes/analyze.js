@@ -15,8 +15,11 @@ const upload = multer({
   }
 });
 
-router.post('/', upload.array('images', 5), async (req, res) => {
-  const files = req.files;
+router.post('/', upload.fields([
+  { name: 'images', maxCount: 5 },
+  { name: 'image',  maxCount: 1 }
+]), async (req, res) => {
+  const files = (req.files?.images || req.files?.image || []);
   if (!files || files.length === 0) return res.status(400).json({ error: 'Nenhuma imagem enviada.' });
 
   try {
