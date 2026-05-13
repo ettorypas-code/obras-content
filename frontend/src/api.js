@@ -17,7 +17,9 @@ api.interceptors.request.use(async (config) => {
 export const analyzeImage = (files, theme = 'dicas') => {
   const form = new FormData();
   const fileArray = Array.isArray(files) ? files : [files];
+  // 'images' = novo backend (multi-foto) | 'image' = retrocompat com backend antigo
   fileArray.forEach(f => form.append('images', f));
+  form.append('image', fileArray[0]); // backward compat
   form.append('theme', theme);
   return api.post('/analyze', form, {
     headers: { 'Content-Type': 'multipart/form-data' }
