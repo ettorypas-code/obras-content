@@ -50,6 +50,7 @@ router.post('/', upload.fields([
     const contentId = await db.insertContent({
       user_id: userId,
       analysis_id: analysisId,
+      theme,
       ideas: result.ideas,
       scripts: result.scripts,
       caption_instagram: result.captions.instagram,

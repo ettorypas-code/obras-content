@@ -48,6 +48,18 @@ const db = {
     }));
   },
 
+  async getContentsWithMetrics(userId) {
+    const supabase = getSupabase();
+    let query = supabase
+      .from('content_items')
+      .select('id, theme, created_at, analyses(context, potential), content_metrics(views, likes, comments, saves, platform)')
+      .order('created_at', { ascending: false });
+    if (userId) query = query.eq('user_id', userId);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
+  },
+
   async updateContentSaved(id, saved) {
     const supabase = getSupabase();
     const { error } = await supabase

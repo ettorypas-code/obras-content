@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, ArrowRight, Flame, CalendarDays } from 'lucide-react';
+import { Camera, ArrowRight, FileText, BarChart2 } from 'lucide-react';
 import { getLibrary, getCalendar } from '../api';
 import PotentialBadge from '../components/PotentialBadge';
 import { usePostNotifications } from '../hooks/usePostNotifications';
@@ -56,6 +56,34 @@ export default function Dashboard() {
         </div>
         <ArrowRight color="rgba(0,0,0,0.5)" size={20} />
       </button>
+
+      {/* Ações rápidas */}
+      <div className="grid grid-cols-2 gap-3">
+        <button onClick={() => navigate('/text')}
+          className="flex items-center gap-3 p-4 rounded-3xl text-left transition-all active:scale-[0.97]"
+          style={{ background: 'var(--bg2)', border: '1.5px solid var(--bg4)' }}>
+          <div className="w-9 h-9 rounded-2xl flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(48,209,88,0.15)' }}>
+            <FileText size={18} color="#30D158" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold" style={{ color: 'var(--label)' }}>Sem foto</p>
+            <p className="text-xs" style={{ color: 'var(--label3)' }}>Só descreva</p>
+          </div>
+        </button>
+        <button onClick={() => navigate('/metrics')}
+          className="flex items-center gap-3 p-4 rounded-3xl text-left transition-all active:scale-[0.97]"
+          style={{ background: 'var(--bg2)', border: '1.5px solid var(--bg4)' }}>
+          <div className="w-9 h-9 rounded-2xl flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(10,132,255,0.15)' }}>
+            <BarChart2 size={18} color="#0A84FF" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold" style={{ color: 'var(--label)' }}>Métricas</p>
+            <p className="text-xs" style={{ color: 'var(--label3)' }}>Ver performance</p>
+          </div>
+        </button>
+      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">

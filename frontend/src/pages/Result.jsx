@@ -1,8 +1,97 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Copy, Check, Bookmark, BookmarkCheck, CalendarPlus, ChevronDown, ChevronUp, Scissors, Lightbulb, ChevronLeft, Share2, Zap } from 'lucide-react';
+import { Copy, Check, Bookmark, BookmarkCheck, CalendarPlus, ChevronDown, ChevronUp, Scissors, Lightbulb, ChevronLeft, Share2, Zap, Play, Pause, X, Gauge } from 'lucide-react';
 import PotentialBadge from '../components/PotentialBadge';
 import { saveContent, createEvent } from '../api';
+
+function Teleprompter({ script, onClose }) {
+  const scrollRef = useRef(null);
+  const rafRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState(1.5);
+
+  const text = [
+    { label: '🎬 HOOK (0–3s)', value: script.hook },
+    { label: '📱 DESENVOLVIMENTO', value: script.development },
+    { label: '⚡ RETENÇÃO', value: script.retention },
+    { label: '📣 CTA', value: script.cta },
+  ].filter(s => s.value);
+
+  const scroll = useCallback(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop += speed * 0.4;
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+      if (scrollTop >= scrollHeight - clientHeight - 2) {
+        setPlaying(false);
+        return;
+      }
+    }
+    rafRef.current = requestAnimationFrame(scroll);
+  }, [speed]);
+
+  useEffect(() => {
+    if (playing) rafRef.current = requestAnimationFrame(scroll);
+    else cancelAnimationFrame(rafRef.current);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [playing, scroll]);
+
+  const SPEEDS = [0.8, 1.5, 2.5, 4];
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: '#000' }}>
+      {/* Controles topo */}
+      <div className="flex items-center justify-between p-4 shrink-0" style={{ borderBottom: '1px solid #222' }}>
+        <button onClick={onClose} className="p-2 rounded-xl" style={{ background: '#1c1c1e' }}>
+          <X size={18} color="white" />
+        </button>
+        <p className="text-sm font-semibold text-white">{script.title}</p>
+        <div className="flex items-center gap-1">
+          <Gauge size={14} color="#FF9F0A" />
+          <div className="flex gap-1">
+            {SPEEDS.map(s => (
+              <button key={s} onClick={() => setSpeed(s)}
+                className="text-xs px-2 py-0.5 rounded-lg font-bold transition-all"
+                style={{
+                  background: speed === s ? '#FF9F0A' : '#1c1c1e',
+                  color: speed === s ? 'black' : '#888'
+                }}>
+                {s}x
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Texto */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8 space-y-8"
+        style={{ scrollBehavior: 'auto' }}>
+        <div className="h-32" /> {/* Padding topo */}
+        {text.map((section, i) => (
+          <div key={i} className="space-y-3">
+            <p className="text-xs font-bold tracking-widest uppercase" style={{ color: '#FF9F0A' }}>
+              {section.label}
+            </p>
+            <p className="text-2xl leading-relaxed font-medium text-white">
+              {section.value}
+            </p>
+          </div>
+        ))}
+        <div className="h-48" /> {/* Padding fundo */}
+      </div>
+
+      {/* Botão play/pause centralizado */}
+      <div className="flex justify-center pb-10 pt-4 shrink-0">
+        <button onClick={() => setPlaying(p => !p)}
+          className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90"
+          style={{ background: playing ? '#FF453A' : '#FF9F0A' }}>
+          {playing
+            ? <Pause size={28} color="black" fill="black" />
+            : <Play size={28} color="black" fill="black" />}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -20,19 +109,20 @@ function CopyButton({ text }) {
   );
 }
 
-function Accordion({ title, icon: Icon, children, defaultOpen = false, accent }) {
+function Accordion({ title, icon: Icon, children, defaultOpen = false, accent, extra }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="card">
-      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between">
+        <button onClick={() => setOpen(!open)} className="flex items-center gap-2 flex-1 text-left">
           <Icon size={16} color={accent || 'var(--orange)'} />
           <span className="font-semibold text-sm" style={{ color: 'var(--label)' }}>{title}</span>
-        </div>
-        {open
-          ? <ChevronUp size={16} style={{ color: 'var(--label3)' }} />
-          : <ChevronDown size={16} style={{ color: 'var(--label3)' }} />}
-      </button>
+          {open
+            ? <ChevronUp size={16} style={{ color: 'var(--label3)' }} className="ml-auto" />
+            : <ChevronDown size={16} style={{ color: 'var(--label3)' }} className="ml-auto" />}
+        </button>
+        {extra && <div className="ml-2 shrink-0">{extra}</div>}
+      </div>
       {open && (
         <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--bg4)' }}>
           {children}
@@ -51,6 +141,7 @@ export default function Result() {
   const [activeScript, setActiveScript] = useState(0);
   const [activePlatform, setActivePlatform] = useState('instagram');
   const [addedToCalendar, setAddedToCalendar] = useState(false);
+  const [teleprompter, setTeleprompter] = useState(false);
 
   if (!result) {
     return (
@@ -103,6 +194,9 @@ export default function Result() {
 
   return (
     <div className="p-4 space-y-4 fade-up">
+      {teleprompter && scripts[activeScript] && (
+        <Teleprompter script={scripts[activeScript]} onClose={() => setTeleprompter(false)} />
+      )}
       {/* Header */}
       <div className="pt-4 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-2 rounded-xl" style={{ background: 'var(--bg3)' }}>
@@ -121,7 +215,11 @@ export default function Result() {
 
       {/* Imagem + contexto */}
       <div className="card">
-        <img src={result.imageUrl || result.image_url} alt="" className="w-full rounded-2xl object-cover max-h-52 mb-3" />
+        {(result.imageUrl || result.image_url)
+          ? <img src={result.imageUrl || result.image_url} alt="" className="w-full rounded-2xl object-cover max-h-52 mb-3" />
+          : <div className="w-full rounded-2xl flex items-center justify-center mb-3 text-4xl"
+              style={{ height: 80, background: 'var(--bg3)' }}>📝</div>
+        }
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium" style={{ color: 'var(--label)' }}>{result.context}</p>
@@ -160,7 +258,14 @@ export default function Result() {
 
       {/* Roteiros */}
       {scripts.length > 0 && (
-        <Accordion title="Roteiros prontos" icon={Zap} defaultOpen={true} accent="#BF5AF2">
+        <Accordion title="Roteiros prontos" icon={Zap} defaultOpen={true} accent="#BF5AF2"
+          extra={
+            <button onClick={() => setTeleprompter(true)}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all active:scale-95"
+              style={{ background: 'rgba(191,90,242,0.15)', color: '#BF5AF2' }}>
+              <Play size={12} fill="#BF5AF2" /> Teleprompter
+            </button>
+          }>
           {scripts.length > 1 && (
             <div className="flex gap-2 mb-3">
               {scripts.map((s, i) => (

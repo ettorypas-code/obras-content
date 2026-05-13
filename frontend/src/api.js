@@ -35,9 +35,13 @@ export const createEvent = (data) => api.post('/calendar', data);
 export const updateEvent = (id, data) => api.patch(`/calendar/${id}`, data);
 export const deleteEvent = (id) => api.delete(`/calendar/${id}`);
 
+export const analyzeText = (situation, theme = 'dicas') =>
+  api.post('/analyze-text', { situation, theme });
+
 export const generateBio = (profile) => api.post('/bio', profile);
 
 export const saveMetrics = (id, data) => api.post(`/metrics/${id}`, data);
 export const getMetrics = (id) => api.get(`/metrics/${id}`);
+export const getAllMetrics = () => api.get('/metrics');
 
 export default api;

@@ -11,6 +11,8 @@ import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
 import BioGenerator from './pages/BioGenerator';
+import TextAnalyze from './pages/TextAnalyze';
+import MetricsDashboard from './pages/MetricsDashboard';
 import { Loader2 } from 'lucide-react';
 
 function ProtectedRoute({ children }) {
@@ -45,6 +47,8 @@ function AppRoutes() {
                   <Route path="/library" element={<Library />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/bio" element={<BioGenerator />} />
+                  <Route path="/text" element={<TextAnalyze />} />
+                  <Route path="/metrics" element={<MetricsDashboard />} />
                 </Routes>
               </ErrorBoundary>
             </div>

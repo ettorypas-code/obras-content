@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 
 const analyzeRouter = require('./routes/analyze');
+const analyzeTextRouter = require('./routes/analyze-text');
 const libraryRouter = require('./routes/library');
 const calendarRouter = require('./routes/calendar');
 const bioRouter = require('./routes/bio');
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use(authMiddleware); // injeta req.userId em todas as rotas
 
 app.use('/api/analyze', analyzeRouter);
+app.use('/api/analyze-text', analyzeTextRouter);
 app.use('/api/library', libraryRouter);
 app.use('/api/calendar', calendarRouter);
 app.use('/api/bio', bioRouter);

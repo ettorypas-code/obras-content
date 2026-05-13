@@ -6,6 +6,17 @@ function getSupabase() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 }
 
+// GET /api/metrics — busca todos os conteúdos com métricas do usuário
+router.get('/', async (req, res) => {
+  try {
+    const db = require('../database');
+    const data = await db.getContentsWithMetrics(req.userId);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/metrics/:id — salva métricas de um conteúdo
 router.post('/:id', async (req, res) => {
   try {

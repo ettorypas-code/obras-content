@@ -96,4 +96,68 @@ async function analyzeAndGenerate(images, theme = 'dicas') {
   return JSON.parse(clean);
 }
 
-module.exports = { analyzeAndGenerate };
+async function analyzeTextOnly(situation, theme = 'dicas') {
+  const genAI = getClient();
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const t = THEME_CONTEXT[theme] || THEME_CONTEXT.dicas;
+
+  const prompt = `Você é um especialista em conteúdo VIRAL para Instagram e TikTok focado em construção civil brasileira.
+
+SITUAÇÃO DESCRITA PELO PROFISSIONAL: "${situation}"
+
+TEMA OBRIGATÓRIO: "${t.label}"
+INSTRUÇÃO DO TEMA: ${t.instruction}
+
+IMPORTANTE: Crie conteúdo baseado apenas na descrição acima, sem imagem. TODO o conteúdo DEVE estar alinhado ao tema "${t.label}".
+
+Retorne APENAS JSON válido, sem markdown, com esta estrutura exata:
+
+{
+  "context": "resumo do que aconteceu na obra",
+  "opportunity": "oportunidade de conteúdo alinhada ao tema ${t.label}",
+  "potential": "alto",
+  "potential_reasons": ["razão 1", "razão 2", "razão 3"],
+  "improvement_tips": ["dica 1", "dica 2", "dica 3"],
+  "ideas": [
+    {"title": "ideia 1 alinhada ao tema", "format": "Reels/TikTok", "potential": "alto"},
+    {"title": "ideia 2", "format": "Carrossel", "potential": "alto"},
+    {"title": "ideia 3", "format": "Reels curto", "potential": "medio"},
+    {"title": "ideia 4", "format": "Stories", "potential": "medio"},
+    {"title": "ideia 5", "format": "Vídeo longo", "potential": "baixo"}
+  ],
+  "scripts": [
+    {
+      "title": "Roteiro Reels/TikTok (60s)",
+      "hook": "gancho dos primeiros 3s alinhado ao tema ${t.label}",
+      "development": "desenvolvimento com detalhes da situação",
+      "retention": "reviravolta ou dado surpresa",
+      "cta": "chamada para ação direta"
+    },
+    {
+      "title": "Roteiro Carrossel (8 slides)",
+      "hook": "título da capa impactante",
+      "development": "descrição dos slides 2 a 7",
+      "retention": "slide de impacto",
+      "cta": "slide final com chamada para ação"
+    }
+  ],
+  "captions": {
+    "instagram": "legenda completa no estilo do tema ${t.label}, com emojis e 10 hashtags de construção civil",
+    "tiktok": "legenda curta no estilo do tema com 4 hashtags trending"
+  },
+  "editing_suggestions": [
+    "sugestão de abertura/gancho visual",
+    "sugestão de trilha sonora",
+    "sugestão de texto na tela",
+    "sugestão de ritmo",
+    "sugestão de cor/filtro"
+  ]
+}`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text().trim();
+  const clean = text.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+  return JSON.parse(clean);
+}
+
+module.exports = { analyzeAndGenerate, analyzeTextOnly };
