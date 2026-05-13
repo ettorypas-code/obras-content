@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import ErrorBoundary from './components/ErrorBoundary';
 import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
 import Result from './pages/Result';
@@ -35,15 +36,17 @@ function AppRoutes() {
         <ProtectedRoute>
           <div className="min-h-screen flex flex-col max-w-lg mx-auto">
             <div className="flex-1 pb-24">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/upload" element={<Upload />} />
-                <Route path="/result" element={<Result />} />
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/library" element={<Library />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/bio" element={<BioGenerator />} />
-              </Routes>
+              <ErrorBoundary>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/upload" element={<Upload />} />
+                  <Route path="/result" element={<Result />} />
+                  <Route path="/calendar" element={<Calendar />} />
+                  <Route path="/library" element={<Library />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/bio" element={<BioGenerator />} />
+                </Routes>
+              </ErrorBoundary>
             </div>
             <Navbar />
           </div>
