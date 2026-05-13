@@ -9,16 +9,28 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) syncProfileFromSupabase(u);
       setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null);
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) syncProfileFromSupabase(u);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Carrega perfil do Supabase se não estiver no localStorage
+  function syncProfileFromSupabase(u) {
+    const local = localStorage.getItem('obras_profile');
+    if (!local && u.user_metadata?.obras_profile) {
+      localStorage.setItem('obras_profile', JSON.stringify(u.user_metadata.obras_profile));
+    }
+  }
 
   const signIn = (email, password) =>
     supabase.auth.signInWithPassword({ email, password });
@@ -28,8 +40,14 @@ export function AuthProvider({ children }) {
 
   const signOut = () => supabase.auth.signOut();
 
+  // Salva perfil tanto no localStorage quanto no Supabase user_metadata
+  const saveProfile = async (profile) => {
+    localStorage.setItem('obras_profile', JSON.stringify(profile));
+    await supabase.auth.updateUser({ data: { obras_profile: profile } });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, saveProfile }}>
       {children}
     </AuthContext.Provider>
   );

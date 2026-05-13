@@ -9,11 +9,14 @@ const calendarRouter = require('./routes/calendar');
 const bioRouter = require('./routes/bio');
 const metricsRouter = require('./routes/metrics');
 
+const authMiddleware = require('./middleware/auth');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
+app.use(authMiddleware); // injeta req.userId em todas as rotas
 
 app.use('/api/analyze', analyzeRouter);
 app.use('/api/library', libraryRouter);

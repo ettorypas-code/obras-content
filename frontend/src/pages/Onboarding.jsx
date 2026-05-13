@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, CheckCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const STEPS = [
   {
@@ -55,6 +56,7 @@ const STEPS = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { saveProfile } = useAuth();
   const [step, setStep] = useState(0);
   const [data, setData] = useState({});
   const [text, setText] = useState('');
@@ -62,13 +64,13 @@ export default function Onboarding() {
   const current = STEPS[step];
   const isLast = step === STEPS.length - 1;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const value = current.type === 'text' ? text : data[current.key];
     if (!value) return;
     const newData = { ...data, [current.key]: value };
     setData(newData);
     if (isLast) {
-      localStorage.setItem('obras_profile', JSON.stringify(newData));
+      await saveProfile(newData); // salva no localStorage + Supabase
       navigate('/');
     } else {
       setStep(s => s + 1);

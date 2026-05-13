@@ -31,7 +31,10 @@ router.post('/', upload.array('images', 5), async (req, res) => {
     const images = files.map(f => ({ buffer: f.buffer, mimeType: f.mimetype }));
     const result = await analyzeAndGenerate(images, theme);
 
+    const userId = req.userId || null;
+
     const analysisId = await db.insertAnalysis({
+      user_id: userId,
       image_path: filename,
       image_url: imageUrl,
       context: result.context,
@@ -42,6 +45,7 @@ router.post('/', upload.array('images', 5), async (req, res) => {
     });
 
     const contentId = await db.insertContent({
+      user_id: userId,
       analysis_id: analysisId,
       ideas: result.ideas,
       scripts: result.scripts,

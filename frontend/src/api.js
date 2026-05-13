@@ -1,7 +1,17 @@
 import axios from 'axios';
+import { supabase } from './lib/supabase';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api'
+});
+
+// Injeta token do usuário em todas as requisições
+api.interceptors.request.use(async (config) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    config.headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+  return config;
 });
 
 export const analyzeImage = (files, theme = 'dicas') => {

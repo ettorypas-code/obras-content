@@ -30,12 +30,14 @@ const db = {
     return row.id;
   },
 
-  async getContents() {
+  async getContents(userId) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
+    let query = supabase
       .from('content_items')
       .select('*, analyses(image_url, context, opportunity, potential)')
       .order('created_at', { ascending: false });
+    if (userId) query = query.eq('user_id', userId);
+    const { data, error } = await query;
     if (error) throw error;
     return data.map(item => ({
       ...item,
@@ -61,24 +63,23 @@ const db = {
     if (error) throw error;
   },
 
-  async getEvents() {
+  async getEvents(userId) {
     const supabase = getSupabase();
-    const { data, error } = await supabase
+    let query = supabase
       .from('calendar_events')
-      .select('*, content_items(caption_instagram, analyses(image_url))')
+      .select('*')
       .order('date', { ascending: true });
+    if (userId) query = query.eq('user_id', userId);
+    const { data, error } = await query;
     if (error) throw error;
-    return data.map(ev => ({
-      ...ev,
-      image_url: ev.content_items?.analyses?.image_url || null
-    }));
+    return data;
   },
 
   async insertEvent(data) {
     const supabase = getSupabase();
     const { data: row, error } = await supabase
       .from('calendar_events')
-      .insert({ ...data, status: 'pendente' })
+      .insert({ ...data, status: data.status || 'pendente' })
       .select('id')
       .single();
     if (error) throw error;
@@ -103,10 +104,10 @@ const db = {
   async uploadImage(buffer, filename, mimetype) {
     const supabase = getSupabase();
     const { error } = await supabase.storage
-      .from('obras-images')
+      .from('obra-images')
       .upload(filename, buffer, { contentType: mimetype, upsert: true });
     if (error) throw error;
-    const { data } = supabase.storage.from('obras-images').getPublicUrl(filename);
+    const { data } = supabase.storage.from('obra-images').getPublicUrl(filename);
     return data.publicUrl;
   }
 };
