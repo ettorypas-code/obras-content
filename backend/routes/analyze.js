@@ -10,7 +10,7 @@ const router = express.Router();
 // que rejeitava silenciosamente arquivos sem extensão (iOS envia "image" sem .jpg)
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }
+  limits: { fileSize: 25 * 1024 * 1024 } // 25MB — segurança caso compressão não rode
 });
 
 router.post('/', upload.any(), async (req, res) => {

@@ -14,14 +14,33 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-export const analyzeImage = (files, theme = 'dicas') => {
-  const form = new FormData();
+// Comprime imagem para max 1200px / JPEG 80% — reduz de 20MB para ~300KB
+function compressImage(file, maxSize = 1200, quality = 0.82) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        blob => resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' })),
+        'image/jpeg', quality
+      );
+    };
+    img.onerror = () => resolve(file); // fallback sem compressão
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+export const analyzeImage = async (files, theme = 'dicas') => {
   const fileArray = Array.isArray(files) ? files : [files];
-  // 'images' = novo backend (multi-foto) | 'image' = retrocompat com backend antigo
-  fileArray.forEach(f => form.append('images', f));
-  form.append('image', fileArray[0]); // backward compat
+  // Comprime todas antes de enviar
+  const compressed = await Promise.all(fileArray.map(f => compressImage(f)));
+  const form = new FormData();
+  compressed.forEach(f => form.append('images', f));
   form.append('theme', theme);
-  // NÃO definir Content-Type manualmente — o browser adiciona o boundary automaticamente
   return api.post('/analyze', form);
 };
 
