@@ -6,31 +6,36 @@ const { analyzeAndGenerate } = require('../services/openai');
 
 const router = express.Router();
 
+// upload.any() aceita qualquer campo e qualquer tipo — sem fileFilter
+// que rejeitava silenciosamente arquivos sem extensão (iOS envia "image" sem .jpg)
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|webp|heic/i;
-    cb(null, allowed.test(path.extname(file.originalname)));
-  }
+  limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-router.post('/', upload.fields([
-  { name: 'images', maxCount: 5 },
-  { name: 'image',  maxCount: 1 }
-]), async (req, res) => {
-  const files = (req.files?.images || req.files?.image || []);
-  if (!files || files.length === 0) return res.status(400).json({ error: 'Nenhuma imagem enviada.' });
+router.post('/', upload.any(), async (req, res) => {
+  // Log de diagnóstico (aparece nos logs do Railway)
+  console.log('[analyze] files recebidos:', req.files?.length, req.files?.map(f => f.fieldname + ':' + f.originalname + ':' + f.mimetype));
+  console.log('[analyze] body keys:', Object.keys(req.body || {}));
+
+  // Aceita arquivos de qualquer field name (images, image, file, etc.)
+  const files = (req.files || []).filter(f => f.mimetype.startsWith('image/'));
+
+  if (!files.length) {
+    return res.status(400).json({
+      error: 'Nenhuma imagem enviada.',
+      debug: { filesRaw: req.files?.length || 0 }
+    });
+  }
 
   try {
     const theme = req.body.theme || 'dicas';
 
-    // Upload da primeira imagem como capa; demais são contexto adicional
     const mainFile = files[0];
-    const filename = `${Date.now()}${path.extname(mainFile.originalname)}`;
+    const ext = path.extname(mainFile.originalname) || '.jpg';
+    const filename = `${Date.now()}${ext}`;
     const imageUrl = await db.uploadImage(mainFile.buffer, filename, mainFile.mimetype);
 
-    // Monta array de imagens para o Gemini
     const images = files.map(f => ({ buffer: f.buffer, mimeType: f.mimetype }));
     const result = await analyzeAndGenerate(images, theme);
 
@@ -73,7 +78,7 @@ router.post('/', upload.fields([
       editing_suggestions: result.editing_suggestions
     });
   } catch (err) {
-    console.error(err);
+    console.error('[analyze] erro:', err);
     res.status(500).json({ error: err.message || 'Erro ao analisar imagem.' });
   }
 });
